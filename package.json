@@ -1,6 +1,6 @@
 {
   "name": "@monsterapi/whisper-playground",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -35,5 +35,33 @@
       "last 1 safari version"
     ]
   },
-  "bin": "./bin/cli.js"
+  "bin": "./bin/cli.js",
+  "keywords": [
+    "whisper-playground",
+    "whisper-UI",
+    "whisper-react-app",
+    "monsterapi-whisper",
+    "genai",
+    "ai",
+    "machine learning",
+    "text generation",
+    "image generation",
+    "speech generation",
+    "models",
+    "falcon-7b-instruct",
+    "mpt-7b-instruct",
+    "llama2-7b-chat",
+    "falcon-40b-instruct",
+    "mpt-30b-instruct",
+    "txt2img",
+    "sdxl",
+    "pix2pix",
+    "img2img",
+    "sunoai-bark",
+    "whisper",
+    "monsterapi",
+    "monsterai",
+    "genrativeaiapi",
+    "generativeAI"
+  ]
 }
