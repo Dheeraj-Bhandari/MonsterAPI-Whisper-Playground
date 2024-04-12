@@ -1,6 +1,6 @@
 {
-  "name": "whisperui",
-  "version": "0.1.0",
+  "name": "@monsterapi/whisper-playground",
+  "version": "0.0.1",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -35,7 +35,5 @@
       "last 1 safari version"
     ]
   },
-  "bin": {
-    "whisperui": "src/index.js"
-  }
+  "bin": "./bin/cli.js"
 }

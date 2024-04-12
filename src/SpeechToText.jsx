@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import MonsterApiClient from "monsterapi";
 import { ReactComponent as MonsterIcon } from "./assets/monster.svg";
+
+// Add your Monsterapi Token here if you dont have please visit https://monsterapi.ai/
 const client = new MonsterApiClient(process.env.REACT_APP_MONSTERAPITOKEN);
 
 const languages = [

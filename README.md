@@ -1,70 +1,68 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# MonsterAPI Whisper Playground
 
-## Available Scripts
+Welcome to the MonsterAPI Whisper Playground! This React template allows you to quickly set up a real-time speech-to-text transcription application using the Whisper model from MonsterAPI.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- **Live Transcription**: Convert live audio into text almost instantly.
+- **Multiple Languages Supported**: Extensive language support to cater to global needs.
+- **Ease of Integration**: Simple setup with comprehensive pre-built UI.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Getting Started
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Prerequisites
 
-### `npm test`
+- Node.js and npm installed on your machine
+- A valid MonsterAPI token (you can obtain one from [MonsterAPI](https://monsterapi.ai/))
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Installation
 
-### `npm run build`
+Execute the following command in your terminal to create a new project with the Whisper Playground:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npx @monsterapi/whisper-playground your_app_name
+cd your_app_name
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Configuration
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **Add your MonsterAPI Token**:
 
-### `npm run eject`
+   Create a `.env` file in the root directory and add your MonsterAPI token like so:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+   ```plaintext
+   REACT_APP_MONSTERAPITOKEN=Your_MonsterAPI_Token_Here
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+   Replace `Your_MonsterAPI_Token_Here` with the token you obtained from MonsterAPI.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Run the Application
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Start the application by running:
 
-## Learn More
+```bash
+npm start
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+This command will launch the application on [http://localhost:3000](http://localhost:3000) in your default web browser.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Usage
 
-### Code Splitting
+The application UI will allow you to:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- **Start/Stop Live Transcription**: Control live audio transcription.
+- **Configure Transcription Settings**: Options for transcription format, beam size, speaker numbers, and more.
+- **Select Language**: Choose from a variety of languages for transcription.
 
-### Analyzing the Bundle Size
+## Support
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+For any issues or support, please contact:
 
-### Making a Progressive Web App
+- **Email**: support@monsterapi.ai
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## License
 
-### Advanced Configuration
+This project is licensed under the MIT License - see the `LICENSE` file for details.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
