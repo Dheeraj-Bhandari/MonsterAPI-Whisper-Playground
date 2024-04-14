@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import MonsterApiClient from "monsterapi";
 import { ReactComponent as MonsterIcon } from "./assets/monster.svg";
-
-// Add your Monsterapi Token here if you dont have please visit https://monsterapi.ai/
-const client = new MonsterApiClient(process.env.REACT_APP_MONSTERAPITOKEN);
+import WaveformVisualizer from "./WaveformVisualizer";
 
 const languages = [
   { code: "none", name: "None" },
@@ -17,6 +15,15 @@ const languages = [
 ];
 
 function SpeechToText() {
+  const [monsterAPIToken, setMonsterAPIToken] = useState("");
+
+  // Add your Monsterapi Token here if you dont have please visit https://monsterapi.ai/
+  const client = new MonsterApiClient(
+    monsterAPIToken || process.env.REACT_APP_MONSTERAPITOKEN
+  );
+
+  const [transcriptionInterval, settranscriptionInterval] = useState(2);
+  const [transcribeTimeout, setTranscribeTimeout] = useState(5);
   const [text, setText] = useState("");
   const [transcriptionFormat, setTranscriptionFormat] = useState("text");
   const [beamSize, setBeamSize] = useState(5);
@@ -29,6 +36,40 @@ function SpeechToText() {
   const mediaRecorderRef = useRef(null);
   const recordingIntervalRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessages, setErrorMessages] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioData, setAudioData] = useState([]);
+
+  const validateConfig = () => {
+    const errorMessages = [];
+
+    if (!monsterAPIToken) {
+      errorMessages.push(`MonsterAPI Token is required.`);
+    }
+
+    if (beamSize < 1) {
+      errorMessages.push("Beam size must be equal to or larger than 1");
+    } else if (beamSize % 1 !== 0) {
+      errorMessages.push("Beam size must be a whole number");
+    }
+    if (transcriptionInterval < 0) {
+      errorMessages.push(`Transcription Interval in Sec larger than ${0}`);
+    }
+    if (bestOf < 0) {
+      errorMessages.push(`Best of must larger than ${0}`);
+    }
+    if (transcriptionInterval < 0) {
+      errorMessages.push(`Transcription Interval in Sec larger than ${0}`);
+    }
+
+    if (errorMessages.length > 0) {
+      setStatusMessage(null);
+      setErrorMessages(errorMessages);
+      return false;
+    }
+    return true;
+  };
 
   const processAudioBlob = async (blob) => {
     setIsProcessing(true);
@@ -42,7 +83,7 @@ function SpeechToText() {
         num_speakers: numSpeakers,
         diarize: diarize,
         remove_silence: removeSilence,
-        language: language,
+        language: language?.code || "en",
         file: uploadResponse,
       });
       setText((prevText) => prevText + " " + transcriptionResponse?.text);
@@ -56,6 +97,7 @@ function SpeechToText() {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
+        // Set up MediaRecorder
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
         const chunks = [];
@@ -67,10 +109,28 @@ function SpeechToText() {
           processAudioBlob(blob);
         };
         mediaRecorder.start();
+
+        // Set up audio context for visualization
+        const audioContext = new (window.AudioContext ||
+          window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+        const processor = audioContext.createScriptProcessor(4096, 1, 1);
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+
+        processor.onaudioprocess = (e) => {
+          // This is where you capture audio for visualization
+          const inputData = e.inputBuffer.getChannelData(0);
+          const inputDataCopy = new Float32Array(inputData); // Copy the data
+          setAudioData(inputDataCopy); // Update the state for visualization
+        };
+
         // Stop recording after 5 seconds and process the audio
         setTimeout(() => {
           if (mediaRecorder.state !== "inactive") {
             mediaRecorder.stop();
+            processor.disconnect(); // Stop processing audio data
+            audioContext.close(); // Close the audio context
           }
         }, 5000);
       })
@@ -80,12 +140,18 @@ function SpeechToText() {
   };
 
   const startLiveTranscription = () => {
+    // const isConfigValid = validateConfig();
+    // if (!isConfigValid) return;
     setIsLiveTranscribing(true);
+    setIsRecording(true);
+    setStatusMessage("Transcription in progress");
     startRecordingSegment(); // Start the first segment immediately
   };
 
   const stopLiveTranscription = () => {
     setIsLiveTranscribing(false);
+    setIsRecording(false);
+    setStatusMessage("Ready to transcribe");
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state === "recording"
@@ -110,8 +176,8 @@ function SpeechToText() {
 
   return (
     <div className="max-w-4xl mx-auto my-10 p-5 shadow-lg bg-white rounded-lg">
-      <div className="flex flex-col justify-center items-center gap-4" >
-        <MonsterIcon  />
+      <div className="flex flex-col justify-center items-center gap-4">
+        <MonsterIcon />
         <h1 className="text-2xl font-bold text-center mb-5">
           Speech to Text Playground
         </h1>
@@ -155,6 +221,16 @@ function SpeechToText() {
           className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
         />
 
+        <input
+          type="number"
+          value={transcriptionInterval}
+          onChange={(e) => settranscriptionInterval(Number(e.target.value))}
+          min="2"
+          max="10"
+          placeholder="Enter Trascription Interval"
+          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+        />
+
         <select
           value={diarize}
           onChange={(e) => setDiarize(e.target.value)}
@@ -186,20 +262,25 @@ function SpeechToText() {
         </select>
       </div>
       <div className="flex justify-center gap-4 mb-5">
-        <button
-          onClick={startLiveTranscription}
-          disabled={isLiveTranscribing}
-          className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-700 disabled:bg-blue-300"
-        >
-          Start Live Transcription
-        </button>
-        <button
-          onClick={stopLiveTranscription}
-          disabled={!isLiveTranscribing}
-          className="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-700 disabled:bg-red-300"
-        >
-          Stop Live Transcription
-        </button>
+        {!isRecording && (
+          <button
+            onClick={startLiveTranscription}
+            disabled={isLiveTranscribing}
+            className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-700 disabled:bg-blue-300"
+          >
+            Start Live Transcription
+          </button>
+        )}
+
+        {isRecording && (
+          <button
+            onClick={stopLiveTranscription}
+            disabled={!isLiveTranscribing}
+            className="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-700 disabled:bg-red-300"
+          >
+            Stop Live Transcription
+          </button>
+        )}
 
         <button
           onClick={() => setText("")}
@@ -220,6 +301,10 @@ function SpeechToText() {
       >
         Visit MonsterAPI Playground
       </a>
+
+      <div>
+        {isRecording && <WaveformVisualizer audioData={audioData} />  }
+      </div>
     </div>
   );
 }
