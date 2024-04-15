@@ -476,17 +476,17 @@ function SpeechToText() {
       <a
         target="__blank"
         href="https://monsterapi.ai/playground"
-        className="hover:text-green-300"
+        className="hover:text-green-600"
       >
-        Visit MonsterAPI Playground
-      </a>
+         MonsterAPI Playground 
+      </a><br />
 
       <a
         target="__blank"
         href="https://developer.monsterapi.ai/reference/getting-started-1"
-        className="hover:text-green-300"
+        className="hover:text-red-600"
       >
-        Visit MonsterAPI Docs
+         MonsterAPI Docs
       </a>
 
       <div>{isRecording && <WaveformVisualizer audioData={audioData} />}</div>
