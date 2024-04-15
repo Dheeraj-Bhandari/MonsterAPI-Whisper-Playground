@@ -234,6 +234,10 @@ function SpeechToText() {
       mediaRecorderRef.current.state === "recording"
     ) {
       mediaRecorderRef.current.stop();
+      // Stop the media stream explicitly
+      mediaRecorderRef.current.stream.getTracks().forEach(track => {
+        track.stop();
+      });
     }
     clearInterval(recordingIntervalRef.current);
   };

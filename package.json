@@ -1,6 +1,6 @@
 {
   "name": "@monsterapi/whisper-playground",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
