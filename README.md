@@ -3,6 +3,10 @@
 
 Welcome to the MonsterAPI Whisper Playground! This React template allows you to quickly set up a real-time speech-to-text transcription application using the Whisper model from MonsterAPI.
 
+## Example UI
+
+![MonsterAPI Whisper Playground UI](https://lh3.googleusercontent.com/u/0/drive-viewer/AKGpihbyiWrKlNwktNYqoH2KS6LkqmUNrjUb7D86JCF-cVVbD-7LDYvvAqxYCPJTEmmmy6QSnfQ2ycRJz5Sm4FlroM5J-L8Mw70mbRY=w1920-h456-v0)
+
 ## Features
 
 - **Live Transcription**: Convert live audio into text almost instantly.
