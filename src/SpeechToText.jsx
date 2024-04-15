@@ -7,7 +7,6 @@ const languages = [
   { code: "none", name: "None" },
   { code: "en", name: "English" },
   { code: "af", name: "Afrikaans" },
-  { code: "am", name: "Amharic" },
   // Add the rest of the languages as objects with 'code' and 'name' properties
   { code: "ar", name: "Arabic" },
   { code: "zh", name: "Chinese" },
@@ -15,11 +14,13 @@ const languages = [
 ];
 
 function SpeechToText() {
-  const [monsterAPIToken, setMonsterAPIToken] = useState("");
+  const [monsterAPIToken, setMonsterAPIToken] = useState( process.env.REACT_APP_MONSTERAPITOKEN || "");
+  const [fileInputKey, setFileInputKey] = useState(Date.now()); // Key for resetting file input
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Add your Monsterapi Token here if you dont have please visit https://monsterapi.ai/
   const client = new MonsterApiClient(
-    monsterAPIToken || process.env.REACT_APP_MONSTERAPITOKEN
+    monsterAPIToken
   );
 
   const [transcriptionInterval, settranscriptionInterval] = useState(2);
@@ -40,6 +41,9 @@ function SpeechToText() {
   const [statusMessage, setStatusMessage] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [audioData, setAudioData] = useState([]);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadFileURL, setUploadedFileURL] = useState("");
 
   const validateConfig = () => {
     const errorMessages = [];
@@ -71,8 +75,8 @@ function SpeechToText() {
     return true;
   };
 
-  const processAudioBlob = async (blob) => {
-    setIsProcessing(true);
+  const processAudioBlob = async (blob) => {   
+    setIsProcessing(true); 
     const file = new File([blob], "recorded_audio.wav", { type: blob.type });
     try {
       const uploadResponse = await client.uploadFile(file);
@@ -84,13 +88,38 @@ function SpeechToText() {
         diarize: diarize,
         remove_silence: removeSilence,
         language: language?.code || "en",
-        file: uploadResponse,
+        file: uploadResponse?.download_url || uploadResponse,
       });
       setText((prevText) => prevText + " " + transcriptionResponse?.text);
     } catch (error) {
       console.error("Error during upload or transcription:", error);
     }
     setIsProcessing(false);
+  };
+
+  const handleFileUpload = async (event) => {
+    const uploadedFile = event.target.files[0];
+    setUploadedFile(uploadedFile);
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", uploadedFile);
+
+      const config = {
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percentCompleted);
+        },
+      };
+
+      const uploadResponse = await client.uploadFile(formData, config);
+      setUploadedFileURL(uploadResponse);
+      setUploading(false);
+    } catch (error) {
+      alert("error while uploading the file. Try Again later");
+    }
   };
 
   const startRecordingSegment = () => {
@@ -148,7 +177,30 @@ function SpeechToText() {
     startRecordingSegment(); // Start the first segment immediately
   };
 
-  const stopLiveTranscription = () => {
+  // For File upload Type transcription
+  const startTranscription = async () => {
+    try {
+      setText("");
+      setStatusMessage("Transcription in progress");
+      const transcriptionResponse = await client.generate("whisper", {
+        transcription_format: transcriptionFormat,
+        beam_size: beamSize,
+        best_of: bestOf,
+        num_speakers: numSpeakers,
+        diarize: diarize,
+        remove_silence: removeSilence,
+        language: language?.code || "en",
+        file: uploadFileURL?.download_url || uploadFileURL,
+      });
+      setText((prevText) => prevText + " " + transcriptionResponse?.text);
+    } catch (error) {
+      console.error("Error during upload or transcription:", error);
+    }
+    setStatusMessage("Transcription done.");
+    setIsProcessing(false);
+  };
+
+  const stopTranscription = () => {
     setIsLiveTranscribing(false);
     setIsRecording(false);
     setStatusMessage("Ready to transcribe");
@@ -159,6 +211,12 @@ function SpeechToText() {
       mediaRecorderRef.current.stop();
     }
     clearInterval(recordingIntervalRef.current);
+  };
+
+  const clear = () => {
+    setText("");
+    setUploadedFile(null);
+    setUploadedFileURL("");
   };
 
   useEffect(() => {
@@ -183,6 +241,44 @@ function SpeechToText() {
         </h1>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        {/* Monsterapi Token */}
+
+        <div className="flex flex-col justify-center items-start gap-1">
+
+        <input
+          type="text"
+          value={monsterAPIToken}
+          onChange={(e) => setMonsterAPIToken(e.target.value)}
+          placeholder="Enter MonsterAPI Token"
+          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+        />
+        <a href="https://monsterapi.ai" target="_blank" className="ms-2 hover:text-blue-600" rel="noopener noreferrer">Click here to get it.</a>
+        </div>
+
+
+        <div className="flex flex-col justify-center items-start gap-1">
+
+        {/* File Upload Input */}
+        <input
+          key={fileInputKey} // Reset input by changing key
+          type="file"
+          accept=".m4a, .mp3, .mp4, .mpeg, .mpga, .wav, .webm, .ogg"
+          onChange={handleFileUpload}
+          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+        />
+
+        {/* Loading Indicator */}
+        {/* Progress Bar */}
+        {uploading && (
+          <div className="relative w-full h-2 bg-gray-200 rounded">
+            <div
+              className="absolute top-0 left-0 h-full bg-blue-500 rounded"
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
+        )}
+        </div>
+
         <select
           className="form-select appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
           value={transcriptionFormat}
@@ -264,26 +360,26 @@ function SpeechToText() {
       <div className="flex justify-center gap-4 mb-5">
         {!isRecording && (
           <button
-            onClick={startLiveTranscription}
+            onClick={uploadedFile ? startTranscription : startLiveTranscription}
             disabled={isLiveTranscribing}
             className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-700 disabled:bg-blue-300"
           >
-            Start Live Transcription
+            {uploadedFile ? "Start Transcription" : "Start Live Transcription"}
           </button>
         )}
 
         {isRecording && (
           <button
-            onClick={stopLiveTranscription}
+            onClick={stopTranscription}
             disabled={!isLiveTranscribing}
             className="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-700 disabled:bg-red-300"
           >
-            Stop Live Transcription
+            {uploadedFile ? "Stop Transcription" : "Stop Live Transcription"}
           </button>
         )}
 
         <button
-          onClick={() => setText("")}
+          onClick={() => clear()}
           // disabled={!isLiveTranscribing}
           className="px-4 py-2 bg-red-300 text-white font-semibold rounded hover:bg-red-700 "
         >
@@ -302,9 +398,9 @@ function SpeechToText() {
         Visit MonsterAPI Playground
       </a>
 
-      <div>
-        {isRecording && <WaveformVisualizer audioData={audioData} />  }
-      </div>
+      <div>{isRecording && <WaveformVisualizer audioData={audioData} />}</div>
+
+      {/* Rest of your component */}
     </div>
   );
 }
