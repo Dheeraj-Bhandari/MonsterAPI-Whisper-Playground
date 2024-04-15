@@ -55,45 +55,53 @@ function SpeechToText() {
 
   const validateConfig = () => {
     const errorMessages = [];
-    setErrorMessages(null)
+    setErrorMessages(null);
     if (!monsterAPIToken.trim()) {
       errorMessages.push(`MonsterAPI Token is required.`);
     }
-  
+
     if (isNaN(beamSize) || beamSize < 1 || !Number.isInteger(beamSize)) {
       errorMessages.push("Beam size must be a positive integer.");
     }
-  
+
     if (isNaN(bestOf) || bestOf < 1 || !Number.isInteger(bestOf)) {
       errorMessages.push("Best of must be a positive integer.");
     }
-  
-    if (isNaN(numSpeakers) || numSpeakers < 1 || !Number.isInteger(numSpeakers)) {
+
+    if (
+      isNaN(numSpeakers) ||
+      numSpeakers < 1 ||
+      !Number.isInteger(numSpeakers)
+    ) {
       errorMessages.push("Number of speakers must be a positive integer.");
     }
-  
+
     if (isNaN(transcriptionInterval) || transcriptionInterval < 0) {
-      errorMessages.push("Transcription interval must be a non-negative number.");
+      errorMessages.push(
+        "Transcription interval must be a non-negative number."
+      );
     }
-  
+
     if (!["true", "false"].includes(diarize)) {
       errorMessages.push("Diarize value must be either 'true' or 'false'.");
     }
-  
+
     if (!["true", "false"].includes(removeSilence)) {
-      errorMessages.push("Remove Silence value must be either 'true' or 'false'.");
+      errorMessages.push(
+        "Remove Silence value must be either 'true' or 'false'."
+      );
     }
-  
-    if (!languages.find(lang => lang.code === language)) {
+
+    if (!languages.find((lang) => lang.code === language)) {
       errorMessages.push("Invalid language selection.");
     }
-  
+
     if (errorMessages.length > 0) {
       setStatusMessage(null);
       setErrorMessages(errorMessages);
       return false;
     }
-    
+
     return true;
   };
 
@@ -119,8 +127,17 @@ function SpeechToText() {
     setIsProcessing(false);
   };
 
+  const isValidFileType = (file) => {
+    const allowedTypes = ["audio/mpeg", "audio/wav", "audio/mp3", /* Add more allowed types if necessary */];
+    return allowedTypes.includes(file?.type);
+};
+
   const handleFileUpload = async (event) => {
     const uploadedFile = event.target.files[0];
+    if (!isValidFileType(uploadedFile)) {
+        alert("Invalid file type. Supported file formats: m4a, mp3, mp4, mpeg, mpga, wav, webm, ogg");
+        return;
+    }
     setUploadedFile(uploadedFile);
     setUploading(true);
     try {
@@ -193,7 +210,7 @@ function SpeechToText() {
   const startLiveTranscription = () => {
     const isConfigValid = validateConfig();
     if (!isConfigValid) return;
-    
+
     setIsLiveTranscribing(true);
     setIsRecording(true);
     setStatusMessage("Transcription in progress");
@@ -235,7 +252,7 @@ function SpeechToText() {
     ) {
       mediaRecorderRef.current.stop();
       // Stop the media stream explicitly
-      mediaRecorderRef.current.stream.getTracks().forEach(track => {
+      mediaRecorderRef.current.stream.getTracks().forEach((track) => {
         track.stop();
       });
     }
@@ -289,19 +306,25 @@ function SpeechToText() {
           </a>
         </div>
 
-        <div className="flex flex-col justify-center items-start gap-1">
+        <div className="flex flex-col justify-center items-start gap-1 hidden">
           {/* File Upload Input */}
+
+   
           <input
             key={fileInputKey} // Reset input by changing key
             type="file"
-            accept=".m4a, .mp3, .mp4, .mpeg, .mpga, .wav, .webm, .ogg"
+            accept=".m4a, .mp3, .mp4, .mpeg, .mpga, .wav, .webm, .ogg" // <-- Here
             onChange={handleFileUpload}
-            className="hidden"
+            className=""
             id="upload-input"
           />
           <label htmlFor="upload-input">
             <Button variant="outlined" component="span">
-              Upload File
+              {!uploadedFile
+                ? "Upload File"
+                : uploading
+                ? "Uploading"
+                : "Uploaded Sucessfully "}
             </Button>
           </label>
           {/* Loading Indicator */}
@@ -418,7 +441,7 @@ function SpeechToText() {
         </FormControl>
       </div>
 
-      {errorMessages &&  <p className="text-red-400">{errorMessages}</p>}
+      {errorMessages && <p className="text-red-400">{errorMessages}</p>}
       <div className="flex justify-center gap-4 mb-5 mt-12">
         {!isRecording && (
           <Button
