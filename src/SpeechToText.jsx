@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import MonsterApiClient from "monsterapi";
 import { ReactComponent as MonsterIcon } from "./assets/monster.svg";
 import WaveformVisualizer from "./WaveformVisualizer";
+import { TextField, Button, Select, MenuItem } from "@mui/material";
 
 const languages = [
   { code: "none", name: "None" },
@@ -14,14 +15,14 @@ const languages = [
 ];
 
 function SpeechToText() {
-  const [monsterAPIToken, setMonsterAPIToken] = useState( process.env.REACT_APP_MONSTERAPITOKEN || "");
+  const [monsterAPIToken, setMonsterAPIToken] = useState(
+    process.env.REACT_APP_MONSTERAPITOKEN || ""
+  );
   const [fileInputKey, setFileInputKey] = useState(Date.now()); // Key for resetting file input
   const [uploadProgress, setUploadProgress] = useState(0);
 
   // Add your Monsterapi Token here if you dont have please visit https://monsterapi.ai/
-  const client = new MonsterApiClient(
-    monsterAPIToken
-  );
+  const client = new MonsterApiClient(monsterAPIToken);
 
   const [transcriptionInterval, settranscriptionInterval] = useState(2);
   const [transcribeTimeout, setTranscribeTimeout] = useState(5);
@@ -75,8 +76,8 @@ function SpeechToText() {
     return true;
   };
 
-  const processAudioBlob = async (blob) => {   
-    setIsProcessing(true); 
+  const processAudioBlob = async (blob) => {
+    setIsProcessing(true);
     const file = new File([blob], "recorded_audio.wav", { type: blob.type });
     try {
       const uploadResponse = await client.uploadFile(file);
@@ -242,149 +243,162 @@ function SpeechToText() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
         {/* Monsterapi Token */}
-
         <div className="flex flex-col justify-center items-start gap-1">
-
-        <input
-          type="text"
-          value={monsterAPIToken}
-          onChange={(e) => setMonsterAPIToken(e.target.value)}
-          placeholder="Enter MonsterAPI Token"
-          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-        />
-        <a href="https://monsterapi.ai" target="_blank" className="ms-2 hover:text-blue-600" rel="noopener noreferrer">Click here to get it.</a>
+          <TextField
+            label="MonsterAPI Token"
+            value={monsterAPIToken}
+            onChange={(e) => setMonsterAPIToken(e.target.value)}
+            variant="outlined"
+            fullWidth
+          />
+          <a
+            href="https://monsterapi.ai"
+            target="_blank"
+            className="ms-2 hover:text-blue-600"
+            rel="noopener noreferrer"
+          >
+            Click here to get it.
+          </a>
         </div>
 
-
         <div className="flex flex-col justify-center items-start gap-1">
-
-        {/* File Upload Input */}
-        <input
-          key={fileInputKey} // Reset input by changing key
-          type="file"
-          accept=".m4a, .mp3, .mp4, .mpeg, .mpga, .wav, .webm, .ogg"
-          onChange={handleFileUpload}
-          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-        />
-
-        {/* Loading Indicator */}
-        {/* Progress Bar */}
-        {uploading && (
-          <div className="relative w-full h-2 bg-gray-200 rounded">
-            <div
-              className="absolute top-0 left-0 h-full bg-blue-500 rounded"
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
-          </div>
-        )}
+          {/* File Upload Input */}
+          <input
+            key={fileInputKey} // Reset input by changing key
+            type="file"
+            accept=".m4a, .mp3, .mp4, .mpeg, .mpga, .wav, .webm, .ogg"
+            onChange={handleFileUpload}
+            className="hidden"
+            id="upload-input"
+          />
+          <label htmlFor="upload-input">
+            <Button variant="outlined" component="span">
+              Upload File
+            </Button>
+          </label>
+          {/* Loading Indicator */}
+          {/* Progress Bar */}
+          {uploading && (
+            <div className="relative w-full h-2 bg-gray-200 rounded">
+              <div
+                className="absolute top-0 left-0 h-full bg-blue-500 rounded"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+          )}
         </div>
 
-        <select
-          className="form-select appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+        <Select
+          label="Transcription Format"
           value={transcriptionFormat}
           onChange={(e) => setTranscriptionFormat(e.target.value)}
+          variant="outlined"
+          fullWidth
         >
-          <option value="text">Text</option>
-          <option value="word">Word</option>
-          <option value="srt">SRT</option>
-          <option value="verbose">Verbose</option>
-        </select>
+          <MenuItem value="text">Text</MenuItem>
+          <MenuItem value="word">Word</MenuItem>
+          <MenuItem value="srt">SRT</MenuItem>
+          <MenuItem value="verbose">Verbose</MenuItem>
+        </Select>
 
-        <input
+        <TextField
+          label="Beam Size"
           type="number"
           value={beamSize}
           onChange={(e) => setBeamSize(Number(e.target.value))}
-          min="1"
-          max="100"
-          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+          variant="outlined"
+          fullWidth
         />
 
-        <input
+        <TextField
+          label="Best Of"
           type="number"
           value={bestOf}
           onChange={(e) => setBestOf(Number(e.target.value))}
-          min="1"
-          max="92233"
-          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+          variant="outlined"
+          fullWidth
         />
 
-        <input
+        <TextField
+          label="Number of Speakers"
           type="number"
           value={numSpeakers}
           onChange={(e) => setNumSpeakers(Number(e.target.value))}
-          min="2"
-          max="10"
-          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+          variant="outlined"
+          fullWidth
         />
 
-        <input
+        <TextField
+          label="Transcription Interval"
           type="number"
           value={transcriptionInterval}
           onChange={(e) => settranscriptionInterval(Number(e.target.value))}
-          min="2"
-          max="10"
-          placeholder="Enter Trascription Interval"
-          className="form-input appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+          variant="outlined"
+          fullWidth
         />
 
-        <select
+        <Select
+          label="Diarize"
           value={diarize}
           onChange={(e) => setDiarize(e.target.value)}
-          className="form-select appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+          variant="outlined"
+          fullWidth
         >
-          <option value="false">False</option>
-          <option value="true">True</option>
-        </select>
+          <MenuItem value="false">False</MenuItem>
+          <MenuItem value="true">True</MenuItem>
+        </Select>
 
-        <select
+        <Select
+          label="Remove Silence"
           value={removeSilence}
           onChange={(e) => setRemoveSilence(e.target.value)}
-          className="form-select appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+          variant="outlined"
+          fullWidth
         >
-          <option value="false">False</option>
-          <option value="true">True</option>
-        </select>
+          <MenuItem value="false">False</MenuItem>
+          <MenuItem value="true">True</MenuItem>
+        </Select>
 
-        <select
+        <Select
+          label="Language"
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="form-select appearance-none block w-full px-3 py-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+          variant="outlined"
+          fullWidth
         >
           {languages.map((lang) => (
-            <option key={lang.code} value={lang.code}>
+            <MenuItem key={lang.code} value={lang.code}>
               {lang.name}
-            </option>
+            </MenuItem>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="flex justify-center gap-4 mb-5">
         {!isRecording && (
-          <button
+          <Button
             onClick={uploadedFile ? startTranscription : startLiveTranscription}
             disabled={isLiveTranscribing}
-            className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-700 disabled:bg-blue-300"
+            variant="contained"
+            color="primary"
           >
             {uploadedFile ? "Start Transcription" : "Start Live Transcription"}
-          </button>
+          </Button>
         )}
 
         {isRecording && (
-          <button
+          <Button
             onClick={stopTranscription}
             disabled={!isLiveTranscribing}
-            className="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-700 disabled:bg-red-300"
+            variant="contained"
+            color="secondary"
           >
             {uploadedFile ? "Stop Transcription" : "Stop Live Transcription"}
-          </button>
+          </Button>
         )}
 
-        <button
-          onClick={() => clear()}
-          // disabled={!isLiveTranscribing}
-          className="px-4 py-2 bg-red-300 text-white font-semibold rounded hover:bg-red-700 "
-        >
+        <Button onClick={() => clear()} variant="contained" color="secondary">
           Clear
-        </button>
+        </Button>
       </div>
       <div className="mt-5">
         <p className="whitespace-pre-wrap text-gray-700 text-base">{text}</p>
