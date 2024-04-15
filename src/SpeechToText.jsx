@@ -55,31 +55,45 @@ function SpeechToText() {
 
   const validateConfig = () => {
     const errorMessages = [];
-
-    if (!monsterAPIToken) {
+    setErrorMessages(null)
+    if (!monsterAPIToken.trim()) {
       errorMessages.push(`MonsterAPI Token is required.`);
     }
-
-    if (beamSize < 1) {
-      errorMessages.push("Beam size must be equal to or larger than 1");
-    } else if (beamSize % 1 !== 0) {
-      errorMessages.push("Beam size must be a whole number");
+  
+    if (isNaN(beamSize) || beamSize < 1 || !Number.isInteger(beamSize)) {
+      errorMessages.push("Beam size must be a positive integer.");
     }
-    if (transcriptionInterval < 0) {
-      errorMessages.push(`Transcription Interval in Sec larger than ${0}`);
+  
+    if (isNaN(bestOf) || bestOf < 1 || !Number.isInteger(bestOf)) {
+      errorMessages.push("Best of must be a positive integer.");
     }
-    if (bestOf < 0) {
-      errorMessages.push(`Best of must larger than ${0}`);
+  
+    if (isNaN(numSpeakers) || numSpeakers < 1 || !Number.isInteger(numSpeakers)) {
+      errorMessages.push("Number of speakers must be a positive integer.");
     }
-    if (transcriptionInterval < 0) {
-      errorMessages.push(`Transcription Interval in Sec larger than ${0}`);
+  
+    if (isNaN(transcriptionInterval) || transcriptionInterval < 0) {
+      errorMessages.push("Transcription interval must be a non-negative number.");
     }
-
+  
+    if (!["true", "false"].includes(diarize)) {
+      errorMessages.push("Diarize value must be either 'true' or 'false'.");
+    }
+  
+    if (!["true", "false"].includes(removeSilence)) {
+      errorMessages.push("Remove Silence value must be either 'true' or 'false'.");
+    }
+  
+    if (!languages.find(lang => lang.code === language)) {
+      errorMessages.push("Invalid language selection.");
+    }
+  
     if (errorMessages.length > 0) {
       setStatusMessage(null);
       setErrorMessages(errorMessages);
       return false;
     }
+    
     return true;
   };
 
@@ -177,8 +191,9 @@ function SpeechToText() {
   };
 
   const startLiveTranscription = () => {
-    // const isConfigValid = validateConfig();
-    // if (!isConfigValid) return;
+    const isConfigValid = validateConfig();
+    if (!isConfigValid) return;
+    
     setIsLiveTranscribing(true);
     setIsRecording(true);
     setStatusMessage("Transcription in progress");
@@ -187,6 +202,8 @@ function SpeechToText() {
 
   // For File upload Type transcription
   const startTranscription = async () => {
+    const isConfigValid = validateConfig();
+    if (!isConfigValid) return;
     try {
       setText("");
       setStatusMessage("Transcription in progress");
@@ -396,6 +413,8 @@ function SpeechToText() {
           </Select>
         </FormControl>
       </div>
+
+      {errorMessages &&  <p className="text-red-400">{errorMessages}</p>}
       <div className="flex justify-center gap-4 mb-5 mt-12">
         {!isRecording && (
           <Button
@@ -433,6 +452,14 @@ function SpeechToText() {
         className="hover:text-green-300"
       >
         Visit MonsterAPI Playground
+      </a>
+
+      <a
+        target="__blank"
+        href="https://developer.monsterapi.ai/reference/getting-started-1"
+        className="hover:text-green-300"
+      >
+        Visit MonsterAPI Docs
       </a>
 
       <div>{isRecording && <WaveformVisualizer audioData={audioData} />}</div>
