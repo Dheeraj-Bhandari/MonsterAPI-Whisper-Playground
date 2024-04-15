@@ -2,7 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import MonsterApiClient from "monsterapi";
 import { ReactComponent as MonsterIcon } from "./assets/monster.svg";
 import WaveformVisualizer from "./WaveformVisualizer";
-import { TextField, Button, Select, MenuItem } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
 
 const languages = [
   { code: "none", name: "None" },
@@ -288,18 +295,24 @@ function SpeechToText() {
           )}
         </div>
 
-        <Select
-          label="Transcription Format"
-          value={transcriptionFormat}
-          onChange={(e) => setTranscriptionFormat(e.target.value)}
-          variant="outlined"
-          fullWidth
-        >
-          <MenuItem value="text">Text</MenuItem>
-          <MenuItem value="word">Word</MenuItem>
-          <MenuItem value="srt">SRT</MenuItem>
-          <MenuItem value="verbose">Verbose</MenuItem>
-        </Select>
+        <FormControl fullWidth>
+          <InputLabel id="Transcription-Format-label">
+            Transcription Format
+          </InputLabel>
+          <Select
+            id="Transcription-Format-label"
+            label="Transcription Format"
+            value={transcriptionFormat}
+            onChange={(e) => setTranscriptionFormat(e.target.value)}
+            variant="outlined"
+            fullWidth
+          >
+            <MenuItem value="text">Text</MenuItem>
+            <MenuItem value="word">Word</MenuItem>
+            <MenuItem value="srt">SRT</MenuItem>
+            <MenuItem value="verbose">Verbose</MenuItem>
+          </Select>
+        </FormControl>
 
         <TextField
           label="Beam Size"
@@ -337,43 +350,53 @@ function SpeechToText() {
           fullWidth
         />
 
-        <Select
-          label="Diarize"
-          value={diarize}
-          onChange={(e) => setDiarize(e.target.value)}
-          variant="outlined"
-          fullWidth
-        >
-          <MenuItem value="false">False</MenuItem>
-          <MenuItem value="true">True</MenuItem>
-        </Select>
+        <FormControl fullWidth>
+          <InputLabel id="Diarize-label">Diarize</InputLabel>
+          <Select
+            id="Diarize-label"
+            label="Diarize"
+            value={diarize}
+            onChange={(e) => setDiarize(e.target.value)}
+            variant="outlined"
+          >
+            <MenuItem value="false">False</MenuItem>
+            <MenuItem value="true">True</MenuItem>
+          </Select>
+        </FormControl>
 
-        <Select
-          label="Remove Silence"
-          value={removeSilence}
-          onChange={(e) => setRemoveSilence(e.target.value)}
-          variant="outlined"
-          fullWidth
-        >
-          <MenuItem value="false">False</MenuItem>
-          <MenuItem value="true">True</MenuItem>
-        </Select>
+        <FormControl fullWidth>
+          <InputLabel id="Remove-Silence-label">Remove Silence</InputLabel>
+          <Select
+            id="Remove-Silence-label"
+            label="Remove Silence"
+            value={removeSilence}
+            onChange={(e) => setRemoveSilence(e.target.value)}
+            variant="outlined"
+          >
+            <MenuItem value="false">False</MenuItem>
+            <MenuItem value="true">True</MenuItem>
+          </Select>
+        </FormControl>
 
-        <Select
-          label="Language"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          variant="outlined"
-          fullWidth
-        >
-          {languages.map((lang) => (
-            <MenuItem key={lang.code} value={lang.code}>
-              {lang.name}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl fullWidth>
+          <InputLabel id="Language-label">Language</InputLabel>
+          <Select
+            id="Language-label"
+            label="Language"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            variant="outlined"
+            fullWidth
+          >
+            {languages.map((lang) => (
+              <MenuItem key={lang.code} value={lang.code}>
+                {lang.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </div>
-      <div className="flex justify-center gap-4 mb-5">
+      <div className="flex justify-center gap-4 mb-5 mt-12">
         {!isRecording && (
           <Button
             onClick={uploadedFile ? startTranscription : startLiveTranscription}
@@ -413,8 +436,6 @@ function SpeechToText() {
       </a>
 
       <div>{isRecording && <WaveformVisualizer audioData={audioData} />}</div>
-
-      {/* Rest of your component */}
     </div>
   );
 }
