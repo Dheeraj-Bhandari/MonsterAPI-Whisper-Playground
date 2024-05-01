@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
-import MonsterApiClient from "monsterapi";
-import { ReactComponent as MonsterIcon } from "./assets/monster.svg";
-import WaveformVisualizer from "./WaveformVisualizer";
+import React, { useState, useEffect, useRef } from 'react';
+import MonsterApiClient from 'monsterapi';
+import { ReactComponent as MonsterIcon } from './assets/monster.svg';
+import WaveformVisualizer from './WaveformVisualizer';
 import {
   TextField,
   Button,
@@ -9,21 +9,21 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-} from "@mui/material";
+} from '@mui/material';
 
 const languages = [
-  { code: "none", name: "None" },
-  { code: "en", name: "English" },
-  { code: "af", name: "Afrikaans" },
+  { code: 'none', name: 'None' },
+  { code: 'en', name: 'English' },
+  { code: 'af', name: 'Afrikaans' },
   // Add the rest of the languages as objects with 'code' and 'name' properties
-  { code: "ar", name: "Arabic" },
-  { code: "zh", name: "Chinese" },
+  { code: 'ar', name: 'Arabic' },
+  { code: 'zh', name: 'Chinese' },
   // Add all the other languages here following the same structure
 ];
 
 function SpeechToText() {
   const [monsterAPIToken, setMonsterAPIToken] = useState(
-    process.env.REACT_APP_MONSTERAPITOKEN || ""
+    process.env.REACT_APP_MONSTERAPITOKEN || ''
   );
   const [fileInputKey, setFileInputKey] = useState(Date.now()); // Key for resetting file input
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -33,14 +33,14 @@ function SpeechToText() {
 
   const [transcriptionInterval, settranscriptionInterval] = useState(2);
   const [transcribeTimeout, setTranscribeTimeout] = useState(5);
-  const [text, setText] = useState("");
-  const [transcriptionFormat, setTranscriptionFormat] = useState("text");
+  const [text, setText] = useState('');
+  const [transcriptionFormat, setTranscriptionFormat] = useState('text');
   const [beamSize, setBeamSize] = useState(5);
   const [bestOf, setBestOf] = useState(8);
   const [numSpeakers, setNumSpeakers] = useState(2);
-  const [diarize, setDiarize] = useState("false");
-  const [removeSilence, setRemoveSilence] = useState("false");
-  const [language, setLanguage] = useState("en");
+  const [diarize, setDiarize] = useState('false');
+  const [removeSilence, setRemoveSilence] = useState('false');
+  const [language, setLanguage] = useState('en');
   const [isLiveTranscribing, setIsLiveTranscribing] = useState(false);
   const mediaRecorderRef = useRef(null);
   const recordingIntervalRef = useRef(null);
@@ -51,7 +51,7 @@ function SpeechToText() {
   const [audioData, setAudioData] = useState([]);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadFileURL, setUploadedFileURL] = useState("");
+  const [uploadFileURL, setUploadedFileURL] = useState('');
 
   const validateConfig = () => {
     const errorMessages = [];
@@ -61,11 +61,11 @@ function SpeechToText() {
     }
 
     if (isNaN(beamSize) || beamSize < 1 || !Number.isInteger(beamSize)) {
-      errorMessages.push("Beam size must be a positive integer.");
+      errorMessages.push('Beam size must be a positive integer.');
     }
 
     if (isNaN(bestOf) || bestOf < 1 || !Number.isInteger(bestOf)) {
-      errorMessages.push("Best of must be a positive integer.");
+      errorMessages.push('Best of must be a positive integer.');
     }
 
     if (
@@ -73,27 +73,27 @@ function SpeechToText() {
       numSpeakers < 1 ||
       !Number.isInteger(numSpeakers)
     ) {
-      errorMessages.push("Number of speakers must be a positive integer.");
+      errorMessages.push('Number of speakers must be a positive integer.');
     }
 
     if (isNaN(transcriptionInterval) || transcriptionInterval < 0) {
       errorMessages.push(
-        "Transcription interval must be a non-negative number."
+        'Transcription interval must be a non-negative number.'
       );
     }
 
-    if (!["true", "false"].includes(diarize)) {
+    if (!['true', 'false'].includes(diarize)) {
       errorMessages.push("Diarize value must be either 'true' or 'false'.");
     }
 
-    if (!["true", "false"].includes(removeSilence)) {
+    if (!['true', 'false'].includes(removeSilence)) {
       errorMessages.push(
         "Remove Silence value must be either 'true' or 'false'."
       );
     }
 
     if (!languages.find((lang) => lang.code === language)) {
-      errorMessages.push("Invalid language selection.");
+      errorMessages.push('Invalid language selection.');
     }
 
     if (errorMessages.length > 0) {
@@ -107,42 +107,48 @@ function SpeechToText() {
 
   const processAudioBlob = async (blob) => {
     setIsProcessing(true);
-    const file = new File([blob], "recorded_audio.wav", { type: blob.type });
+    const file = new File([blob], 'recorded_audio.wav', { type: blob.type });
     try {
       const uploadResponse = await client.uploadFile(file);
-      const transcriptionResponse = await client.generate("whisper", {
+      const transcriptionResponse = await client.generate('whisper', {
         transcription_format: transcriptionFormat,
         beam_size: beamSize,
         best_of: bestOf,
         num_speakers: numSpeakers,
         diarize: diarize,
         remove_silence: removeSilence,
-        language: language?.code || "en",
+        language: language?.code || 'en',
         file: uploadResponse?.download_url || uploadResponse,
       });
-      setText((prevText) => prevText + " " + transcriptionResponse?.text);
+      setText((prevText) => prevText + ' ' + transcriptionResponse?.text);
     } catch (error) {
-      console.error("Error during upload or transcription:", error);
+      console.error('Error during upload or transcription:', error);
     }
     setIsProcessing(false);
   };
 
   const isValidFileType = (file) => {
-    const allowedTypes = ["audio/mpeg", "audio/wav", "audio/mp3", /* Add more allowed types if necessary */];
+    const allowedTypes = [
+      'audio/mpeg',
+      'audio/wav',
+      'audio/mp3' /* Add more allowed types if necessary */,
+    ];
     return allowedTypes.includes(file?.type);
-};
+  };
 
   const handleFileUpload = async (event) => {
     const uploadedFile = event.target.files[0];
     if (!isValidFileType(uploadedFile)) {
-        alert("Invalid file type. Supported file formats: m4a, mp3, mp4, mpeg, mpga, wav, webm, ogg");
-        return;
+      alert(
+        'Invalid file type. Supported file formats: m4a, mp3, mp4, mpeg, mpga, wav, webm, ogg'
+      );
+      return;
     }
     setUploadedFile(uploadedFile);
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", uploadedFile);
+      formData.append('file', uploadedFile);
 
       const config = {
         onUploadProgress: (progressEvent) => {
@@ -157,7 +163,7 @@ function SpeechToText() {
       setUploadedFileURL(uploadResponse);
       setUploading(false);
     } catch (error) {
-      alert("error while uploading the file. Try Again later");
+      alert('error while uploading the file. Try Again later');
     }
   };
 
@@ -173,7 +179,7 @@ function SpeechToText() {
           chunks.push(event.data);
         };
         mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: "audio/wav" });
+          const blob = new Blob(chunks, { type: 'audio/wav' });
           processAudioBlob(blob);
         };
         mediaRecorder.start();
@@ -195,7 +201,7 @@ function SpeechToText() {
 
         // Stop recording after 5 seconds and process the audio
         setTimeout(() => {
-          if (mediaRecorder.state !== "inactive") {
+          if (mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
             processor.disconnect(); // Stop processing audio data
             audioContext.close(); // Close the audio context
@@ -203,7 +209,7 @@ function SpeechToText() {
         }, 5000);
       })
       .catch((error) => {
-        console.error("Error accessing microphone:", error);
+        console.error('Error accessing microphone:', error);
       });
   };
 
@@ -213,7 +219,7 @@ function SpeechToText() {
 
     setIsLiveTranscribing(true);
     setIsRecording(true);
-    setStatusMessage("Transcription in progress");
+    setStatusMessage('Transcription in progress');
     startRecordingSegment(); // Start the first segment immediately
   };
 
@@ -222,33 +228,33 @@ function SpeechToText() {
     const isConfigValid = validateConfig();
     if (!isConfigValid) return;
     try {
-      setText("");
-      setStatusMessage("Transcription in progress");
-      const transcriptionResponse = await client.generate("whisper", {
+      setText('');
+      setStatusMessage('Transcription in progress');
+      const transcriptionResponse = await client.generate('whisper', {
         transcription_format: transcriptionFormat,
         beam_size: beamSize,
         best_of: bestOf,
         num_speakers: numSpeakers,
         diarize: diarize,
         remove_silence: removeSilence,
-        language: language?.code || "en",
+        language: language?.code || 'en',
         file: uploadFileURL?.download_url || uploadFileURL,
       });
-      setText((prevText) => prevText + " " + transcriptionResponse?.text);
+      setText((prevText) => prevText + ' ' + transcriptionResponse?.text);
     } catch (error) {
-      console.error("Error during upload or transcription:", error);
+      console.error('Error during upload or transcription:', error);
     }
-    setStatusMessage("Transcription done.");
+    setStatusMessage('Transcription done.');
     setIsProcessing(false);
   };
 
   const stopTranscription = () => {
     setIsLiveTranscribing(false);
     setIsRecording(false);
-    setStatusMessage("Ready to transcribe");
+    setStatusMessage('Ready to transcribe');
     if (
       mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "recording"
+      mediaRecorderRef.current.state === 'recording'
     ) {
       mediaRecorderRef.current.stop();
       // Stop the media stream explicitly
@@ -260,9 +266,9 @@ function SpeechToText() {
   };
 
   const clear = () => {
-    setText("");
+    setText('');
     setUploadedFile(null);
-    setUploadedFileURL("");
+    setUploadedFileURL('');
   };
 
   useEffect(() => {
@@ -309,7 +315,6 @@ function SpeechToText() {
         <div className="flex flex-col justify-center items-start gap-1 hidden">
           {/* File Upload Input */}
 
-   
           <input
             key={fileInputKey} // Reset input by changing key
             type="file"
@@ -321,10 +326,10 @@ function SpeechToText() {
           <label htmlFor="upload-input">
             <Button variant="outlined" component="span">
               {!uploadedFile
-                ? "Upload File"
+                ? 'Upload File'
                 : uploading
-                ? "Uploading"
-                : "Uploaded Sucessfully "}
+                  ? 'Uploading'
+                  : 'Uploaded Sucessfully '}
             </Button>
           </label>
           {/* Loading Indicator */}
@@ -450,7 +455,7 @@ function SpeechToText() {
             variant="contained"
             color="primary"
           >
-            {uploadedFile ? "Start Transcription" : "Start Live Transcription"}
+            {uploadedFile ? 'Start Transcription' : 'Start Live Transcription'}
           </Button>
         )}
 
@@ -461,7 +466,7 @@ function SpeechToText() {
             variant="contained"
             color="secondary"
           >
-            {uploadedFile ? "Stop Transcription" : "Stop Live Transcription"}
+            {uploadedFile ? 'Stop Transcription' : 'Stop Live Transcription'}
           </Button>
         )}
 
@@ -478,15 +483,16 @@ function SpeechToText() {
         href="https://monsterapi.ai/playground"
         className="hover:text-green-600"
       >
-         MonsterAPI Playground 
-      </a><br />
+        MonsterAPI Playground
+      </a>
+      <br />
 
       <a
         target="__blank"
         href="https://developer.monsterapi.ai/reference/getting-started-1"
         className="hover:text-red-600"
       >
-         MonsterAPI Docs
+        MonsterAPI Docs
       </a>
 
       <div>{isRecording && <WaveformVisualizer audioData={audioData} />}</div>

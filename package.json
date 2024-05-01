@@ -19,7 +19,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "prepare": "husky"
+    "prepare": "husky",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json}\""
   },
   "eslintConfig": {
     "extends": [

@@ -4,7 +4,7 @@ import SpeechToText from './SpeechToText';
 function App() {
   return (
     <div className="App">
-     <SpeechToText/>
+      <SpeechToText />
     </div>
   );
 }
