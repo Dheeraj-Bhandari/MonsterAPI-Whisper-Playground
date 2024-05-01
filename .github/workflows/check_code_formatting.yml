@@ -23,19 +23,3 @@ jobs:
 
       - name: Check formatting
         run: npm run format:check
-        continue-on-error: true  # Continue to set status even if formatting check fails
-
-      - name: Set status
-        if: ${{ failure() }}  # Only set status if previous step failed (i.e., formatting check failed)
-        uses: actions/github-script@v4
-        with:
-          script: |
-            github.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: github.sha,
-              state: 'failure',
-              context: 'Prettier Formatting Check',
-              description: 'Code formatting check with Prettier failed. Please fix the formatting issues.',
-            })
-          github-token: ${{ secrets.GITHUB_TOKEN }}
